@@ -168,7 +168,7 @@ function page() {
                 })
 
                 setrenametrue(true);
-            }, 1000);
+            }, 2000);
 
         } catch (error) {
             console.log(error);
@@ -210,10 +210,10 @@ function page() {
 
 
     return (
-        <div className=' max-w-screen relative min-h-screen ' >
+        <div className=' max-w-screen relative  ' >
 
 
-            <div className='border p-5 rounded flex flex-col gap-4 w-[90vw] mx-auto   '>
+            <div className='border p-5 rounded flex flex-col gap-4 max-w-[80vw] mx-auto   '>
                 <div className='flex flex-col  '>
 
                     <div className='flex justify-between gap-2'>
@@ -236,14 +236,14 @@ function page() {
                     </ul>
                 </div>
 
-                <div className='overflow-y-auto max-h-[80vh] flex flex-col gap-2'>
+                <div className='overflow-y-auto flex flex-col gap-2 h-[68vh]'>
 
                
                 {filedata.length > 0 ? (
                     filedata.map((file, i) => {
 
                         if (file.type === "folder") return (
-                            <div key={i} className={`${rename.id === file._id && renametrue ? "bg-green-500" : "bg-yellow-700"} border flex flex-col text-white  hover:cursor-pointer p-3 rounded-xl `} onPointerDown={() => filefolderedit(file._id, file.name, file.discription)} onClick={() => clearTimeout(timer.current)} onDoubleClick={() => updatepath(file._id, file.name)}>
+                            <div key={i} className={`${rename.id === file._id && renametrue ? "bg-green-500" : "bg-yellow-700"} border flex flex-col text-white  hover:cursor-pointer p-3 rounded-xl `} onPointerDown={() => filefolderedit(file._id, file.name, file.discription)} onPointerUp={() => clearTimeout(timer.current)} onDoubleClick={() => updatepath(file._id, file.name)}>
                                 <p>{file.name}</p>
                                 <p className='text-sm text-gray-300 ' key={i}> discription - {file.discription}</p>
                                 <p> file type - {file.type}</p>
@@ -330,7 +330,7 @@ function page() {
 
             {
                 renametrue && (
-                    <div className='bg-gray-600 max-w-80 m-auto rounded-xl p-2 flex flex-col gap-4 text-white absolute top-[50%] left-[50%] transform -translate-y-1/2 -translate-x-1/2'>
+                    <div className='bg-gray-600  m-auto rounded-xl p-2 flex flex-col gap-4 text-white absolute top-[50%] left-[50%] transform -translate-y-1/2 -translate-x-1/2'>
 
                         <form id='renameform' className='flex flex-col' onSubmit={handleSubmit(saverename)}>
                             <p>

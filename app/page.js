@@ -7,15 +7,24 @@ import { ImCross } from "react-icons/im";
 import { Sidebar, SidebarContent, SidebarProvider, SidebarHeader, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarTrigger } from '@/components/ui/sidebar';
 import { FaRegFileCode } from "react-icons/fa";
 import { LuFolderSearch } from "react-icons/lu";
+import { Button } from '@/components/ui/button';
+import { FaPlus } from "react-icons/fa";
+import { AnimatePresence, motion, scale } from "motion/react"
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 function App() {
 
+  const MotionButton = motion(Button)
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
   } = useForm()
+
+  const newfilefolderRef = useRef(null)
+  const newfolderRef = useRef(null)
 
   // All the states for holding data
   const [language, setlanguage] = useState("cpp")
@@ -54,6 +63,7 @@ function App() {
   const [infobox, setinfobox] = useState(false)
   const [changepath, setchangepath] = useState(false)
   const [newfolder, setnewfolder] = useState(false)
+  const [newfilefolder, setnewfilefolder] = useState(false)
 
 
   //to save code and set infobox state
@@ -70,6 +80,31 @@ function App() {
     filefolderholder();
   }, [])
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (newfilefolderRef.current && !newfilefolderRef.current.contains(event.target)) {
+        setnewfilefolder(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (newfolderRef.current && !newfolderRef.current.contains(event.target)) {
+        setnewfolder(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   //to create folders
   const foldercreate = async (data) => {
@@ -173,37 +208,13 @@ function App() {
 
   return (
     <>
-      <div className='  min-h-screen  w-screen flex flex-col items-center justify-center bg-black text-white  py-10 relative '>
-
-        <SidebarProvider className='absolute top-0'>
-         
-          <Sidebar>
-            
-            <SidebarContent className='flex flex-col gap-4 p-4 '>
-              <SidebarMenu className="bg-muted rounded-xl p-2">
-                <SidebarMenuButton>
-                  <div className='flex gap-2 items-center justify-center'>
-                    <FaRegFileCode />
-                    <p>Code editor</p>
-                  </div>
-                </SidebarMenuButton>
-                <SidebarMenuButton>
-                  <div className='flex gap-2 items-center justify-center'>
-                    <LuFolderSearch />
-                    <p>Folders</p>
-                  </div>
-                </SidebarMenuButton>
-              </SidebarMenu>
+      <div className=' h-full   flex flex-col items-center justify-center  text-white  relative  '>
 
 
-            </SidebarContent>
-          </Sidebar>
- <SidebarTrigger />
-        </SidebarProvider>
-        <div className='flex items-center gap-5'>
+        <div className=' '>
 
-          <div className='flex flex-col gap-4 '>
-            <select className=' border  bg-gray-700  ' value={language} onChange={e => setlanguage(e.target.value)}>
+          <div className='flex flex-col gap-4 border rounded-2xl '>
+            {/* <select className=' border  bg-gray-700  ' value={language} onChange={e => setlanguage(e.target.value)}>
               {
                 options.map((lang, i) => (
                   <option key={i} className='text-white ' value={lang}>{lang}</option>
@@ -224,14 +235,33 @@ function App() {
                 className=' border-1 border-white rounded-lg'
 
               />
-            </div>
-            <div className='flex gap-2.5'>
+            </div> */}
+            {/* <div className='flex gap-2.5'>
 
               <button onClick={handleonsubmit} className='bg-blue-500 w-17.5 h-6.5 rounded-lg border-b-2  font-semibold text-white'>
                 Submit
               </button>
               <button onClick={() => infocodesave("original")} className='bg-green-500 w-17.5 h-6.5 rounded-l text-white font-bold'> Save</button>
+            </div> */}
+
+            <div className='flex flex-col  gap-3  border-zinc-400 rounded-2xl p-6 '>
+              <div className='flex flex-col md:flex-row gap-1  md:gap-3'>
+
+                <p className='text-lg md:text-4xl font-mono font-bold md:font-semibold md:py-4'>Recently</p>
+                <p className='text-2xl md:text-4xl font-mono font-semibold md:py-4'>Added Files</p>
+              </div>
+              <div>
+                <ul className='flex flex-col gap-3 overflow-y-auto h-96 '>
+                  {Array.from({ length: 7 }).map((_, i) => (
+
+                    <li key={i} className='bg-zinc-700  w-[75vw] md:w-[50vw] py-8 md:py-12 rounded-2xl'></li>
+                  )
+
+                  )}
+                </ul>
+              </div>
             </div>
+
           </div>
 
           {
@@ -261,19 +291,26 @@ function App() {
 
         </div>
 
+   <AnimatePresence>
 
         {
 
-          newfolder && (<div className='z-20 bg-gray-700 p-3 rounded-xl'>
+          newfolder && (<motion.div ref={newfolderRef}
+  initial={{ opacity: 0, y: '0%' }}
+  animate={{  opacity: 1, y: '50%' }}
+  exit={{ opacity: 0, y: '100%' }}
+  transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 20 }}
+  className="z-20 bg-zinc-800 p-3 rounded-xl absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+>
 
-            <form className='flex flex-col gap-4' onSubmit={handleSubmit(foldercreate)} >
+            <form className='flex flex-col gap-4 w-[30vw]' onSubmit={handleSubmit(foldercreate)}  >
 
-              <div className='flex flex-col gap-6  '>
+              <div className='flex flex-col gap-3  '>
 
-                <input className='border p-2' placeholder='folder Name' {...register("foldername")} />
-                <input className='border p-2' type="text" placeholder='discription' {...register("folderdiscription")} />
+                <Input className='border rounded-md p-2' placeholder='folder Name' {...register("foldername")} />
+                <Textarea className='border rounded-md p-2 h-46' type="text" placeholder='discription' {...register("folderdiscription")} />
               </div>
-              <button type='submit' className='bg-blue-400 p-1 px-4 rounded-lg'>submit</button>
+              <Button type='submit' className=' bg-teal-600 font-semibold  p-1 px-4 rounded-lg w-md mx-auto text-white hover:text-black'>submit</Button>
             </form>
             <div>
 
@@ -281,9 +318,10 @@ function App() {
 
 
 
-          </div>)
+          </motion.div>)
         }
 
+        </AnimatePresence>
 
         {changepath && (<div className='border p-5 rounded flex flex-col gap-4'>
           <div className='flex flex-col '>
@@ -337,7 +375,28 @@ function App() {
           </div>
         </div>)}
 
+        <div>
+          <AnimatePresence>
+          {
+            newfilefolder && (
 
+                <motion.div ref={newfilefolderRef} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} style={{transformOrigin: "bottom right"}} transition={{ duration: 0.8, type: "spring", stiffness: 300, damping: 20 }} className='flex flex-col gap-2 bg-zinc-800 border p-2 rounded-xl absolute right-16 bottom-18 '>
+                  <MotionButton whileTap={{scale: 0.9}} transition={{type: "spring", stiffness: 300, damping: 20}}  variant={"normal"} onClick={() => setnewfolder(true)} className={"bg-transparent border px-6 hover:bg-zinc-600 text-white"}>New folder</MotionButton>
+                  <MotionButton whileTap={{scale: 0.9}} transition={{type: "spring", stiffness: 300, damping: 20}}  variant={"normal"} onClick={() => setnewfile(true)} className={"bg-transparent border px-6 hover:bg-zinc-600 text-white"}>New file</MotionButton>
+                </motion.div>
+            )
+          }
+              </AnimatePresence>
+          <motion.div whileTap={{ scale: 0.9 }}  className=' absolute bottom-0 right-0 p-7 '>
+
+
+            <Button className="bg-teal-500 rounded-full aspect-square text-black  p-6 hover:bg-teal-300" onClick={() => setnewfilefolder(prev => !prev)}>
+            
+              <FaPlus   />
+            </Button>
+          </motion.div>
+
+        </div>
       </div>
     </>
   )

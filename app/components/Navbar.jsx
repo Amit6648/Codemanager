@@ -2,17 +2,43 @@ import React from 'react'
 import { FaRegFileCode } from "react-icons/fa";
 import { LuFolderSearch } from "react-icons/lu";
 import Link from 'next/link';
+import { Sidebar, SidebarContent, SidebarInset, SidebarMenu, SidebarMenuButton, } from '@/components/ui/sidebar';
+import { CustomTrigger } from '@/components/ui/CustomTrigger';
 
 function Navbar() {
   return (
-    <div className=' absolute left-0 top-[30%] z-10 '>
 
-       <div className=' bg-gray-600 p-4 rounded-r-2xl flex flex-col gap-8'>
-            <Link href={"/"} ><FaRegFileCode className='size-6' /></Link>
-            <Link href={"/folders"}><LuFolderSearch className='size-6' /></Link>
-       </div>
 
-    </div>
+
+    <Sidebar variant='inset'>
+      <SidebarContent className='flex flex-col gap-4 p-4 '>
+        <SidebarMenu className="bg-muted rounded-xl p-2">
+          <Link href="/">
+          <SidebarMenuButton className="hover:bg-slate-600">
+            <div className='flex gap-2 items-center justify-center'>
+              <FaRegFileCode />
+              <p>Files</p>
+            </div>
+          </SidebarMenuButton>
+          </Link>
+          <Link href="/folders">
+          <SidebarMenuButton className="hover:bg-slate-600">
+            <div className='flex gap-2 items-center justify-center'>
+              <LuFolderSearch />
+              <p>Folders</p>
+            </div>
+          </SidebarMenuButton>
+          </Link>
+        </SidebarMenu>
+      </SidebarContent>
+        
+    </Sidebar >
+
+  
+
+
+
+
   )
 }
 
