@@ -6,6 +6,10 @@ const folderschema = new mongoose.Schema({
     code : String,
     parent : String,
     type : String,
+    time :  {
+        type: Date,
+        default: Date.now,
+    }
 })
 
 const Folder = mongoose.models.folder || mongoose.model("folder", folderschema);

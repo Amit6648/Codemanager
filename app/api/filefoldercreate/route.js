@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"; 
 import connection from "@/lib/mongo"
 import createff from "@/models/createfilefolder"
+import { time } from "motion";
 
 
 export async function POST(req) {
@@ -14,7 +15,8 @@ export async function POST(req) {
       discription : filefolderdata.discription,
       parent : filefolderdata.parent,
       code : filefolderdata.code,
-      type : filefolderdata.type
+      type : filefolderdata.type,
+
     })
 console.log("succsess");
 
