@@ -10,9 +10,9 @@ function Navbar() {
 
 
 
-    <Sidebar variant='inset'>
-      <SidebarContent className='flex flex-col gap-4 p-4 '>
-        <SidebarMenu className="bg-muted rounded-xl p-2">
+    <Sidebar  variant='inset'>
+      <SidebarContent className='flex flex-col gap-4 p-4 bg-zinc-950 rounded-2xl '>
+        <SidebarMenu className="bg-zinc-900 rounded-xl p-2">
           <Link href="/">
           <SidebarMenuButton className="hover:bg-slate-600">
             <div className='flex gap-2 items-center justify-center'>
