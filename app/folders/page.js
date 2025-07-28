@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import axios from 'axios'
 import Editor from "@monaco-editor/react";
-import { time } from 'motion';
+import { AnimatePresence, motion, scale } from "motion/react"
 import { Button } from '@/components/ui/button';
 
 import {
@@ -14,6 +14,7 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import Newfolder from '@/components/Newfolder';
 function page() {
     const {
         register,
@@ -51,6 +52,7 @@ function page() {
     })
 
     const [renametrue, setrenametrue] = useState(false)
+     const [changepath, setchangepath] = useState(false)
 
 
     // to hold code 
@@ -243,7 +245,7 @@ function page() {
                     filedata.map((file, i) => {
 
                         if (file.type === "folder") return (
-                            <div key={i} className={`${rename.id === file._id && renametrue ? "bg-green-500" : "bg-yellow-700"} border flex flex-col text-white  hover:cursor-pointer p-3 rounded-xl `} onPointerDown={() => filefolderedit(file._id, file.name, file.discription)} onPointerUp={() => clearTimeout(timer.current)} onDoubleClick={() => updatepath(file._id, file.name)}>
+                            <div key={i} className={`${rename.id === file._id && renametrue ? "bg-green-500" : "bg-yellow-700"} border flex flex-col text-white  hover:cursor-pointer p-3 rounded-xl hover:bg-yellow-600 `} onPointerDown={() => filefolderedit(file._id, file.name, file.discription)} onPointerUp={() => clearTimeout(timer.current)} onDoubleClick={() => updatepath(file._id, file.name)}>
                                 <p>{file.name}</p>
                                 <p className='text-sm text-gray-300 ' key={i}> discription - {file.discription}</p>
                                 <p> file type - {file.type}</p>
@@ -254,7 +256,7 @@ function page() {
 
                         else
                             if (file.type === "file") return (
-                                <div key={i} className={`${rename.id === file._id && renametrue ? "bg-green-500" : "bg-blue-700"} border flex flex-col text-white  hover:cursor-pointer p-3 rounded-xl `} onDoubleClick={() => opencode(file.code, file._id)} onPointerDown={() => filefolderedit(file._id, file.name, file.discription)} onPointerUp={() => clearTimeout(timer.current)}>
+                                <div key={i} className={`${rename.id === file._id && renametrue ? "bg-green-500" : "bg-blue-700"} border flex flex-col text-white  hover:cursor-pointer p-3 rounded-xl hover:bg-blue-600 `} onDoubleClick={() => opencode(file.code, file._id)} onPointerDown={() => filefolderedit(file._id, file.name, file.discription)} onPointerUp={() => clearTimeout(timer.current)}>
                                     <p>{file.name}</p>
                                     <p className='text-sm text-gray-300 ' key={i}> discription - {file.discription}</p>
                                     <p> file type - {file.type}</p>
@@ -270,34 +272,13 @@ function page() {
                  </div>
                 <div className=' flex justify-between gap-12'>
 
-                    <Button className='bg-blue-400 py-1 px-2 text-black  rounded-lg w-40' onClick={handleback}>Back</Button>
-                    <Button className='bg-blue-400 py-1 px-2 text-black  rounded-lg w-40' onClick={() => setnewfolder(prev => !prev)}>{!newfolder ? "New folder" : "close"}</Button>
+                    <Button className=' py-1 px-2 text-black hover:bg-zinc-400  font-semibold rounded-lg w-40' onClick={handleback}>Back</Button>
+                    <Button className='bg-teal-500 font-semibold py-1 px-2 text-black  rounded-lg w-40' onClick={() => setnewfolder(prev => !prev)}>{!newfolder ? "New folder" : "close"}</Button>
                 </div>
 
                 {
 
-                    newfolder && (<div className='z-20 bg-gray-700 p-3 rounded-xl  mx-auto bg-gradient-to-tl from-green-400/20 to-blue-500/20 '>
-
-                        <form className='flex flex-col gap-4' onSubmit={handleSubmit(foldercreate)} >
-
-                            <div className='flex flex-col gap-6  '>
-
-                                <input className='border  border-white text-white p-2' placeholder='folder Name' {...register("foldername")} />
-                                <input className='border border-white text-white p-2' type="text" placeholder='discription' {...register("folderdiscription")} />
-                            </div>
-                            <div className='flex justify-between gap-10'>
-
-                                <button type='submit' className='bg-blue-400 p-1 px-4 rounded-lg w-30 '>submit</button>
-                                <p className='text-white '>current path - {currentpath.filefoldername}</p>
-                            </div>
-                        </form>
-                        <div>
-
-                        </div>
-
-
-
-                    </div>)
+                    newfolder && (<Newfolder foldercreate={foldercreate} newfolder={newfolder} setnewfolder={setnewfolder} />)
                 }
 
             </div>

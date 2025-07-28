@@ -20,6 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import Newfolder from '@/components/Newfolder';
+import Changepath from '@/components/Changepath';
 
 function App() {
 
@@ -295,93 +297,9 @@ function App() {
 
 
 
-        <AnimatePresence>
+       <Newfolder newfolder={newfolder} setnewfolder={setnewfolder} setchangepath={setchangepath} foldercreate={foldercreate}/>
 
-          {newfolder && (
-
-            <motion.div
-              initial={{ opacity: 0, y: '0%' }}
-              animate={{ opacity: 1, y: '50%' }}
-              exit={{ opacity: 0, y: '100%' }}
-              transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 20 }}
-              className='absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2'
-
-            >
-
-              <div className='flex justify-end items-center p-2 '>
-
-                <motion.span className=' hover:cursor-pointer text-xl font-bold bg-zinc-800 rounded-full p-1 border  '>
-                  <RxCross2 onClick={() => setnewfolder(false)} />
-                </motion.span>
-              </div>
-
-              <div className="z-20  p-3 rounded-xl border bg-zinc-800 border-zinc-500 ">
-
-
-
-                <form className='flex flex-col gap-4 w-[60vw] md:w-[30vw] ' onSubmit={handleSubmit(foldercreate)}  >
-
-
-                  <div className='flex flex-col gap-3  '>
-
-                    <Input className='border rounded-md p-2' placeholder='folder Name' {...register("foldername")} />
-                    <Textarea className='border rounded-md p-2 h-46' type="text" placeholder='discription' {...register("folderdiscription")} />
-                  </div>
-                  <div className='flex justify-around gap-2'>
-
-                    <Button onClick={() => setnewfolder(false)} type='submit' className=' bg-teal-600 font-semibold  p-1 px-6 rounded-lg  text-white hover:text-black'>Create</Button>
-                    <Button type='button' onClick={() => setchangepath(true)} className={"font-semibold  p-1 px-6 rounded-lg  "}>Path</Button>
-                  </div>
-                </form>
-                <div>
-
-                </div>
-
-
-              </div>
-
-            </motion.div>)
-          }
-
-        </AnimatePresence>
-
-        {changepath && (<div className='border p-5 rounded-2xl flex flex-col gap-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-zinc-800 w-[50vw] md:w-[30vw] z-30'>
-          <div className='flex flex-col '>
-
-          
-            <div>
-
-              <ul className='flex' >
-                {
-                  breadpath.map((path, i) => (
-                    <li key={i}>{path.filefoldername}/</li>
-                  ))
-                }
-              </ul>
-            </div>
-
-          </div>
-
-          <div className='flex flex-col gap-3 overflow-y-auto h-96 border rounded-2xl p-4 '>
-            {filedata.length > 0 ? (
-              filedata.map((file, i) => (
-                <div key={i} className=' border flex flex-col text-white  hover:cursor-pointer p-3 rounded-xl ' onClick={() => updatepath(file._id, file.name)}>
-                  <p>{file.name}</p>
-                  <p className='text-sm text-gray-300 ' key={i}> discription - {file.discription}</p>
-                  <p> file type - {file.type}</p>
-
-                </div>
-
-              ))) : (
-              <div className='text-blue-400'>there are no folders yet</div>
-            )
-            }
-          </div>
-          <div className='flex justify-between '>
-            <Button className={"w-30 bg-zinc-900 text-white hover:bg-zinc-700 "} onClick={handleback}>Back</Button>
-            <Button className=' w-30 py-1 px-2 text-black  rounded-lg hover:bg-zinc-400' onClick={() => setchangepath(false)}>Close</Button>
-          </div>
-        </div>)}
+        {changepath && (<Changepath breadpath={breadpath} filedata={filedata} handleback={handleback} setchangepath={setchangepath} updatepath={updatepath}/>)}
         {infobox && (<div className='flex flex-col gap-4 border bg-zinc-900  rounded-md absolute  top-[25%]  w-[35vw] p-3'>
           <ImCross className='text-white text-sm hover:cursor-pointer hover:text-black self-end' onClick={handlecloseall} />
           <div className='  flex flex-col gap-6'>
