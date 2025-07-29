@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server"; 
 import connection from "@/lib/mongo"
 import createff from "@/models/createfilefolder"
-import { time } from "motion";
+
 
 
 export async function POST(req) {
     connection();
 
   const {filefolderdata} = await req.json();
+  console.log(filefolderdata);
+  
 
   try {
     await createff.create({
@@ -16,6 +18,9 @@ export async function POST(req) {
       parent : filefolderdata.parent,
       code : filefolderdata.code,
       type : filefolderdata.type,
+      language : filefolderdata.language,
+      breadcrumb : filefolderdata.breadcrumb,
+ 
 
     })
 console.log("succsess");

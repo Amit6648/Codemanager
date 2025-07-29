@@ -4,15 +4,20 @@ import Editor from "@monaco-editor/react";
 import { useForm } from "react-hook-form"
 import axios from 'axios';
 import { ImCross } from "react-icons/im";
-import { Sidebar, SidebarContent, SidebarProvider, SidebarHeader, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarTrigger } from '@/components/ui/sidebar';
-import { FaRegFileCode } from "react-icons/fa";
-import { LuFolderSearch } from "react-icons/lu";
 import { Button } from '@/components/ui/button';
 import { FaPlus } from "react-icons/fa";
 import { AnimatePresence, motion, scale } from "motion/react"
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RxCross2 } from "react-icons/rx";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import {
   Select,
   SelectContent,
@@ -122,7 +127,9 @@ function App() {
         name: data.foldername,
         discription: data.folderdiscription,
         parent: currentpath.filefolderid,
-        type: "folder"
+        type: "folder",
+        breadcrumb: breadpath,
+        language: "cpp"
       }
     }).then(res => console.log(res)).catch(error => console.log(error));
 
@@ -282,24 +289,40 @@ function App() {
           </div>
           <div>
             <ul className='flex flex-col gap-3 overflow-y-auto h-96 '>
-              {
-                recentlyupdated.map((file, i) => (
-                  <li  key={i} className='bg-zinc-700  w-[75vw] md:w-[50vw] p-3 rounded-2xl'>
-                    <p className='text-white'>{file.name}</p>
-                    <p className='text-gray-300 text-sm'>Discription - {file.discription}</p>
-                    <p className='text-gray-300 text-sm'>Type - {file.type}</p>
-                    <p className='text-gray-300 text-sm'>Created at - {new Date(file.time).toLocaleString()}</p>
-                  </li>
-                ))}
+              {recentlyupdated.length > 0 ? (recentlyupdated.map((file, i) => (
+                <li key={i} className='bg-zinc-700  w-[75vw] md:w-[50vw] p-3 rounded-2xl flex flex-col gap-1'>
+                  <p className='text-white'>{file.name}</p>
+                  <p className='text-gray-300 text-sm truncate w-96'>Description - {file.description}</p>
+                  <p className='text-gray-300 text-sm'>Created at - {new Date(file.time).toLocaleString()}</p>
+                  <div className='flex gap-2 items-center'>
+                    <p className='text-zinc-300 text-sm'>Location -</p>
+                    {
+                      file.breadcrumb.map((path, i) => (
+                        <Breadcrumb key={i}>
+                          <BreadcrumbList>
+                            <BreadcrumbItem>
+                              {path.name}
+                            </BreadcrumbItem>
+                            <BreadcrumbSeparator />
+                          </BreadcrumbList>
+                        </Breadcrumb>
+                      ))
+                    }
+                  </div>
+
+                </li>
+              ))) : (
+                <span>Threre are no files</span>
+              )}
             </ul>
           </div>
         </div>
 
 
 
-       <Newfolder newfolder={newfolder} setnewfolder={setnewfolder} setchangepath={setchangepath} foldercreate={foldercreate}/>
+        <Newfolder newfolder={newfolder} setnewfolder={setnewfolder} setchangepath={setchangepath} foldercreate={foldercreate} />
 
-        {changepath && (<Changepath breadpath={breadpath} filedata={filedata} handleback={handleback} setchangepath={setchangepath} updatepath={updatepath}/>)}
+        {changepath && (<Changepath breadpath={breadpath} filedata={filedata} handleback={handleback} setchangepath={setchangepath} updatepath={updatepath} />)}
         {infobox && (<div className='flex flex-col gap-4 border bg-zinc-900  rounded-md absolute  top-[25%]  w-[35vw] p-3'>
           <ImCross className='text-white text-sm hover:cursor-pointer hover:text-black self-end' onClick={handlecloseall} />
           <div className='  flex flex-col gap-6'>

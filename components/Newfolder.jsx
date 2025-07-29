@@ -49,7 +49,7 @@ function Newfolder({newfolder, setnewfolder, setchangepath, foldercreate}) {
                   </div>
                   <div className='flex justify-around gap-2'>
 
-                    <Button onClick={() => setnewfolder(false)} type='submit' className=' bg-teal-600 font-semibold  p-1 px-6 rounded-lg  text-white hover:text-black'>Create</Button>
+                    <Button  type='submit' className=' bg-teal-600 font-semibold  p-1 px-6 rounded-lg  text-white hover:text-black'>Create</Button>
                     <Button type='button' onClick={() => setchangepath(true)} className={"font-semibold  p-1 px-6 rounded-lg  "}>Path</Button>
                   </div>
                 </form>

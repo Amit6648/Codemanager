@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import axios from 'axios'
 import Editor from "@monaco-editor/react";
-import { AnimatePresence, motion, scale } from "motion/react"
+
 import { Button } from '@/components/ui/button';
 
 import {
@@ -14,7 +14,17 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import Newfolder from '@/components/Newfolder';
+import Changepath from '@/components/Changepath';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 function page() {
     const {
         register,
@@ -27,9 +37,15 @@ function page() {
 
     //hold data of folders and files
     const [filedata, setfiledata] = useState([])
+    const [ordering, setordering] = useState([])
+    const [files, setfiles] = useState([])
 
     //to toggle foldercreate
     const [newfolder, setnewfolder] = useState(false)
+    const [renametrue, setrenametrue] = useState(false)
+    const [changepath, setchangepath] = useState(false)
+    const [order, setorder] = useState("order")
+
 
     //hold id and name of currunt folder
     const [currentpath, setcurrentpath] = useState({
@@ -51,8 +67,7 @@ function page() {
         id: null
     })
 
-    const [renametrue, setrenametrue] = useState(false)
-     const [changepath, setchangepath] = useState(false)
+
 
 
     // to hold code 
@@ -64,8 +79,53 @@ function page() {
 
     const [edit, setedit] = useState(false);
 
+    const [onlyfiles, setonlyfiles] = useState(false)
+
 
     const timer = useRef(null)
+
+    //to fetch onlyfiles
+    const handleonlyfiles = async () => {
+        await axios.get("/api/alldata").then(res => setfiles(res.data.data));
+        console.log(files);
+
+
+
+    }
+
+    useEffect(() => {
+        if (onlyfiles) {
+            handleonlyfiles();
+        }
+
+    }, [onlyfiles])
+
+
+    // to order data 
+
+    const dataorder = () => {
+        if (order === "order") {
+            const sort = [...filedata].sort((a, b) => a.name.localeCompare(b.name));
+            setordering(sort);
+            console.log(sort);
+
+        }
+        else if (order === "date") {
+            const sort = [...filedata].sort((a, b) => new Date(b.time) - new Date(a.time))
+            setordering(sort)
+            console.log(sort);
+
+        }
+
+        else {
+            setordering([...filedata]);
+        }
+    }
+
+    useEffect(() => {
+        dataorder()
+    }, [order, filedata])
+
 
     // to fetch and store data
     const filefolderholder = async () => {
@@ -105,9 +165,14 @@ function page() {
                 name: data.foldername,
                 discription: data.folderdiscription,
                 parent: currentpath.filefolderid,
-                type: "folder"
+                type: "folder",
+                language: "cpp",
+                breadcrumb: Array.isArray(breadpath) ? [...breadpath] : [],
+
             }
         }).then(res => console.log(res)).catch(error => console.log(error));
+
+        setnewfolder(false)
 
         filefolderholder();
     }
@@ -212,64 +277,106 @@ function page() {
 
 
     return (
-        <div className=' max-w-screen relative  ' >
+        <div className=' max-w-screen relative h-auto  ' >
 
 
             <div className='border p-5 rounded flex flex-col gap-4 max-w-[80vw] mx-auto   '>
-                <div className='flex flex-col  '>
+                <div className=' flex justify-between'>
 
-                    <div className='flex justify-between gap-2'>
-                        <p className='font-bold text-gray-600'>currentpath</p>
+                    <div className='flex flex-col  '>
 
+                        <div className='flex justify-between gap-2'>
+                            <p className='font-bold text-gray-600'>currentpath</p>
+
+                        </div>
+                        <ul className='flex text-white' >
+                            {
+                                breadpath.map((path, i) => (
+                                    <Breadcrumb key={i}>
+                                        <BreadcrumbList>
+                                            <BreadcrumbItem>
+                                                {path.filefoldername}
+                                            </BreadcrumbItem>
+                                            <BreadcrumbSeparator />
+                                        </BreadcrumbList>
+                                    </Breadcrumb>
+                                ))
+                            }
+                        </ul>
                     </div>
-                    <ul className='flex text-white' >
-                        {
-                            breadpath.map((path, i) => (
-                                <Breadcrumb key={i}>
-                                    <BreadcrumbList>
-                                        <BreadcrumbItem>
-                                           {path.filefoldername}
-                                        </BreadcrumbItem>
-                                        <BreadcrumbSeparator />
-                                    </BreadcrumbList>
-                                </Breadcrumb>
-                            ))
-                        }
-                    </ul>
+
+                    <Select onValueChange={value => setorder(value)} defaultValue={"order"}>
+                        <SelectTrigger >
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value={"unorder"}>
+                                Unorder
+                            </SelectItem>
+                            <SelectItem value={"order"}>
+                                {"order(A-Z)"}
+                            </SelectItem>
+
+                            <SelectItem value={"date"}>By date</SelectItem>
+                            <p className='flex items-center gap-1 p-1 border rounded-md '>
+                                <Checkbox checked={onlyfiles} onCheckedChange={(value) => setonlyfiles(value)} />
+
+                                <Label className={"text-[13px]"}>Only files</Label>
+                            </p>
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 <div className='overflow-y-auto flex flex-col gap-2 h-[68vh]'>
 
-               
-                {filedata.length > 0 ? (
-                    filedata.map((file, i) => {
 
-                        if (file.type === "folder") return (
-                            <div key={i} className={`${rename.id === file._id && renametrue ? "bg-green-500" : "bg-yellow-700"} border flex flex-col text-white  hover:cursor-pointer p-3 rounded-xl hover:bg-yellow-600 `} onPointerDown={() => filefolderedit(file._id, file.name, file.discription)} onPointerUp={() => clearTimeout(timer.current)} onDoubleClick={() => updatepath(file._id, file.name)}>
-                                <p>{file.name}</p>
-                                <p className='text-sm text-gray-300 ' key={i}> discription - {file.discription}</p>
-                                <p> file type - {file.type}</p>
+                    {
+                        !onlyfiles ? (
+                            ordering.length > 0 ? (
+                                ordering.map((file, i) => {
 
-                            </div>
+                                    if (file.type === "folder") return (
+                                        <div key={i} className={`${rename.id === file._id && renametrue ? "bg-green-500" : "bg-yellow-700"} border flex flex-col text-white  hover:cursor-pointer p-3 rounded-xl hover:bg-yellow-600 `} onPointerDown={() => filefolderedit(file._id, file.name, file.discription)} onPointerUp={() => clearTimeout(timer.current)} onDoubleClick={() => updatepath(file._id, file.name)}>
+                                            <p>{file.name}</p>
+                                            <p className='text-sm text-gray-300 ' key={i}> discription - {file.discription}</p>
+                                            <p> file type - {file.type}</p>
 
-                        )
+                                        </div>
 
-                        else
-                            if (file.type === "file") return (
-                                <div key={i} className={`${rename.id === file._id && renametrue ? "bg-green-500" : "bg-blue-700"} border flex flex-col text-white  hover:cursor-pointer p-3 rounded-xl hover:bg-blue-600 `} onDoubleClick={() => opencode(file.code, file._id)} onPointerDown={() => filefolderedit(file._id, file.name, file.discription)} onPointerUp={() => clearTimeout(timer.current)}>
-                                    <p>{file.name}</p>
-                                    <p className='text-sm text-gray-300 ' key={i}> discription - {file.discription}</p>
-                                    <p> file type - {file.type}</p>
+                                    )
+
+                                    else
+                                        if (file.type === "file") return (
+                                            <div key={i} className={`${rename.id === file._id && renametrue ? "bg-green-500" : "bg-blue-700"} border flex flex-col text-white  hover:cursor-pointer p-3 rounded-xl hover:bg-blue-600 `} onDoubleClick={() => opencode(file.code, file._id)} onPointerDown={() => filefolderedit(file._id, file.name, file.discription)} onPointerUp={() => clearTimeout(timer.current)}>
+                                                <p>{file.name}</p>
+                                                <p className='text-sm text-gray-300 ' key={i}> discription - {file.discription}</p>
+                                                <p> file type - {file.type}</p>
 
 
-                                </div>
+                                            </div>
 
+                                        )
+                                })) : (
+                                <div className='text-blue-400'>there are no folders yet</div>
                             )
-                    })) : (
-                    <div className='text-blue-400'>there are no folders yet</div>
-                )
-                }
-                 </div>
+
+                        ) : (
+                            <div>
+                                {
+                                    files.map((file, i) =>(
+                                        <div key={i} className={`${rename.id === file._id && renametrue ? "bg-green-500" : "bg-blue-700"} border flex flex-col text-white  hover:cursor-pointer p-3 rounded-xl hover:bg-blue-600 `} onDoubleClick={() => opencode(file.code, file._id)} onPointerDown={() => filefolderedit(file._id, file.name, file.discription)} onPointerUp={() => clearTimeout(timer.current)}>
+                                            <p>{file.name}</p>
+                                            <p className='text-sm text-gray-300 ' key={i}> discription - {file.discription}</p>
+                                            <p> file type - {file.type}</p>
+
+
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        )
+                    }
+                </div>
                 <div className=' flex justify-between gap-12'>
 
                     <Button className=' py-1 px-2 text-black hover:bg-zinc-400  font-semibold rounded-lg w-40' onClick={handleback}>Back</Button>
@@ -278,10 +385,16 @@ function page() {
 
                 {
 
-                    newfolder && (<Newfolder foldercreate={foldercreate} newfolder={newfolder} setnewfolder={setnewfolder} />)
+                    newfolder && (<Newfolder foldercreate={foldercreate} newfolder={newfolder} setnewfolder={setnewfolder} setchangepath={setchangepath} />)
                 }
 
             </div>
+
+            {
+                changepath && (
+                    <Changepath breadpath={breadpath} filedata={filedata} handleback={handleback} setchangepath={setchangepath} updatepath={updatepath} />
+                )
+            }
 
 
             {showcode && (<div className=' absolute top-[50%] left-[50%] transform -translate-y-1/2 -translate-x-1/2 flex gap flex-col gap-3 ' >

@@ -9,7 +9,9 @@ const folderschema = new mongoose.Schema({
     time :  {
         type: Date,
         default: Date.now,
-    }
+    },
+    language : String,
+    breadcrumb : Array
 })
 
 const Folder = mongoose.models.folder || mongoose.model("folder", folderschema);
