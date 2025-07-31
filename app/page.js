@@ -1,6 +1,5 @@
 "use client"
 import { useState, useEffect, useRef } from 'react'
-import Editor from "@monaco-editor/react";
 import { useForm } from "react-hook-form"
 import axios from 'axios';
 import { ImCross } from "react-icons/im";
@@ -9,7 +8,7 @@ import { FaPlus } from "react-icons/fa";
 import { AnimatePresence, motion, scale } from "motion/react"
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { RxCross2 } from "react-icons/rx";
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,15 +17,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+
 import Newfolder from '@/components/Newfolder';
 import Changepath from '@/components/Changepath';
+import Filecreateeditor from '@/components/Filecreateeditor';
+import Editoronly from '@/components/ui/Editoronly';
 
 function App() {
 
@@ -43,12 +38,7 @@ function App() {
 
   // All the states for holding data
   const [language, setlanguage] = useState("cpp")
-  const [suggestion, setsuggestion] = useState('')
-  // to hold improved and orignal code 
-  const [saved, setsaved] = useState({
-    original: '',
-    improved: ''
-  })
+
 
 
   //to hold current folder addresss
@@ -70,6 +60,8 @@ function App() {
 
   const [recentlyupdated, setrecentlyupdated] = useState([])
 
+  const [recentcode, setrecentcode] = useState(null)
+
 
   // for language selection
   const options = ["javascript", "cpp", "c", "python"]
@@ -84,10 +76,9 @@ function App() {
   const [newfile, setnewfile] = useState(false)
 
 
-  //to save code and set infobox state
-  const infocodesave = (codeid) => {
 
-    setcodetosave(saved[codeid])
+  //to save code and set infobox state
+  const infocodesave = () => {
 
     setinfobox(prev => !prev);
   }
@@ -128,8 +119,7 @@ function App() {
         discription: data.folderdiscription,
         parent: currentpath.filefolderid,
         type: "folder",
-        breadcrumb: breadpath,
-        language: "cpp"
+        breadcrumb: Array.isArray(breadpath)?[...breadpath]:[],
       }
     }).then(res => console.log(res)).catch(error => console.log(error));
 
@@ -145,7 +135,9 @@ function App() {
         discription: data.filediscription,
         parent: currentpath.filefolderid,
         type: "file",
-        code: codetosave
+        code: codetosave,
+        language: language,
+         breadcrumb: Array.isArray(breadpath)?[...breadpath]:[]
       }
     }).then(res => console.log(res)).catch(error => console.log(error));
 
@@ -155,24 +147,7 @@ function App() {
 
 
 
-  // to update changes one's the data is updated in the state because react states require a rerender to appear changes
 
-  useEffect(() => {
-
-    const match = suggestion.match(/```([\s\S]*)```/)
-    if (match) {
-      setsaved(prev => ({
-        ...prev, improved: match[1]
-      }));
-      console.log("data");
-    }
-  }, [suggestion])
-
-
-  //to update code in ide
-  const handleupdatedata = (id, content) => {
-    setsaved(prev => ({ ...prev, [id]: content }))
-  }
 
 
 
@@ -216,72 +191,13 @@ function App() {
 
   return (
     <>
-      <div className=' h-full   flex flex-col items-center justify-center  text-white  relative  '>
-
+      <div className=' h-full   flex flex-col items-center justify-center  text-white  relative    '>
 
         {
           newfile && (
-
-            <div className='flex flex-col gap-2 rounded-2xl  absolute bg-black/50 backdrop-blur-md p-4 '>
-              <div className='flex items-center justify-between'>
-
-
-                <Select onValueChange={(value) => setlanguage(value)} defaultValue={language}>
-                  <SelectTrigger className={'w-36'}>
-                    <SelectValue placeholder="Select Language" />
-                  </SelectTrigger>
-                  <SelectContent className='bg-zinc-800 text-white'>
-                    {options.map((option, i) => (
-                      <SelectItem key={i} value={option} className='bg-zinc-800 text-white hover:bg-zinc-700'>
-                        {option}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <span className=' hover:cursor-pointer text-xl font-bold  rounded-full p-1 border hover:text-black   hover:bg-white '>
-                  <RxCross2 onClick={() => setnewfile(false)} />
-                </span>
-              </div>
-
-              <div className=' h-[250px] w-[250px] md:h-[300px] md:w-[300px] lg:h-[400px] lg:w-[400px] flex items-center justify-center rounded-2xl  '>
-
-                <Editor
-                  value={saved['original']}
-                  height="100%"
-                  width=" 100%"
-
-                  defaultLanguage='cpp'
-                  options={{
-                    selectOnLineNumbers: true,
-                    fontSize: 14,
-                    minimap: {
-                      enabled: false
-                    }
-                  }}
-                  onMount={(editor, monaco) => {
-                    editor.focus();
-                    editor.setValue("// Write your code here");
-                  }}
-
-                  theme="vs-dark"
-                  language={language}
-                  onChange={(value) => { handleupdatedata('original', value) }}
-
-
-                  className='rounded-lg'
-
-                />
-              </div>
-              <div className='flex justify-center items-center '>
-                <Button className=' bg-transparent font-semibold  p-1 px-6 rounded-lg border  text-white hover:text-black' onClick={() => infocodesave('original')}>Create</Button>
-              </div>
-
-
-
-            </div>
-
+            <Filecreateeditor infocodesave={infocodesave} language={language} options={options} setlanguage={setlanguage} setcodetosave={setcodetosave} codetosave={codetosave} setnewfile={setnewfile} />
           )}
-        <div className='flex flex-col  gap-3  border-zinc-400 rounded-2xl p-6 '>
+        <div className='flex flex-col  gap-3  border-zinc-400 rounded-2xl p-6 w-[75vw] md:w-[50vw] '>
           <div className='flex flex-col md:flex-row gap-1  md:gap-3'>
 
             <p className='text-lg md:text-4xl font-mono font-bold md:font-semibold md:py-4'>Recently</p>
@@ -290,7 +206,7 @@ function App() {
           <div>
             <ul className='flex flex-col gap-3 overflow-y-auto h-96 '>
               {recentlyupdated.length > 0 ? (recentlyupdated.map((file, i) => (
-                <li key={i} className='bg-zinc-700  w-[75vw] md:w-[50vw] p-3 rounded-2xl flex flex-col gap-1'>
+                <li key={i} onClick={() => setrecentcode(file.code)} className='bg-zinc-700  w-full p-3 rounded-2xl flex flex-col gap-1'>
                   <p className='text-white'>{file.name}</p>
                   <p className='text-gray-300 text-sm truncate w-96'>Description - {file.description}</p>
                   <p className='text-gray-300 text-sm'>Created at - {new Date(file.time).toLocaleString()}</p>
@@ -301,7 +217,7 @@ function App() {
                         <Breadcrumb key={i}>
                           <BreadcrumbList>
                             <BreadcrumbItem>
-                              {path.name}
+                              {path.filefoldername}
                             </BreadcrumbItem>
                             <BreadcrumbSeparator />
                           </BreadcrumbList>
@@ -312,7 +228,7 @@ function App() {
 
                 </li>
               ))) : (
-                <span>Threre are no files</span>
+                <span className='w-full h-full  text-blue-500 text-lg'>Threre are no files</span>
               )}
             </ul>
           </div>
@@ -338,7 +254,6 @@ function App() {
             <Button onClick={() => setchangepath(true)} className='font-semibold  p-1 px-6 rounded-lg  '>Change Path</Button>
           </div>
 
-
         </div>)}
 
         <div>
@@ -363,6 +278,15 @@ function App() {
           </motion.div>
 
         </div>
+
+        {
+
+          recentcode && (<Editoronly key={recentcode} codetosave={recentcode} readOnly={true}>
+            <Button onClick={() => setrecentcode(null)}>
+              close
+            </Button>
+          </Editoronly>)
+        }
       </div>
     </>
   )
