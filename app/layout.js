@@ -33,7 +33,6 @@ export default function RootLayout({ children }) {
           <Navbar />
           <SidebarInset >
             <CustomTrigger />
-
             {children}
           </SidebarInset>
         </SidebarProvider>

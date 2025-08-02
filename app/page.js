@@ -8,6 +8,7 @@ import { FaPlus } from "react-icons/fa";
 import { AnimatePresence, motion, scale } from "motion/react"
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import Image from 'next/image';
 
 import {
   Breadcrumb,
@@ -197,7 +198,7 @@ function App() {
           newfile && (
             <Filecreateeditor infocodesave={infocodesave} language={language} options={options} setlanguage={setlanguage} setcodetosave={setcodetosave} codetosave={codetosave} setnewfile={setnewfile} />
           )}
-        <div className='flex flex-col  gap-3  border-zinc-400 rounded-2xl p-6 w-[75vw] md:w-[50vw] '>
+        <div className='flex flex-col  gap-3  border-zinc-400 rounded-2xl p-6 w-full md:w-[50vw] '>
           <div className='flex flex-col md:flex-row gap-1  md:gap-3'>
 
             <p className='text-lg md:text-4xl font-mono font-bold md:font-semibold md:py-4'>Recently</p>
@@ -208,9 +209,9 @@ function App() {
               {recentlyupdated.length > 0 ? (recentlyupdated.map((file, i) => (
                 <li key={i} onClick={() => setrecentcode(file.code)} className='bg-zinc-700  w-full p-3 rounded-2xl flex flex-col gap-1'>
                   <p className='text-white'>{file.name}</p>
-                  <p className='text-gray-300 text-sm truncate w-96'>Description - {file.description}</p>
+                  <p className='text-gray-300 text-sm truncate '>Description - {file.discription}</p>
                   <p className='text-gray-300 text-sm'>Created at - {new Date(file.time).toLocaleString()}</p>
-                  <div className='flex gap-2 items-center'>
+                  <div className='flex gap-2 items-center '>
                     <p className='text-zinc-300 text-sm'>Location -</p>
                     {
                       file.breadcrumb.map((path, i) => (
@@ -228,7 +229,16 @@ function App() {
 
                 </li>
               ))) : (
+                <div className='flex flex-col justify-center  '>
                 <span className='w-full h-full  text-blue-500 text-lg'>Threre are no files</span>
+               <Image
+               src={'/illustration.svg'}
+               alt='illustration'
+               width={300}
+               height={300}
+            
+               />
+                </div>
               )}
             </ul>
           </div>

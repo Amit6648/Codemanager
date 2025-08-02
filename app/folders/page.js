@@ -3,8 +3,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import axios from 'axios'
 import Editor from "@monaco-editor/react";
-
 import { Button } from '@/components/ui/button';
+import { useMemo } from 'react';
 
 import {
     Breadcrumb,
@@ -21,10 +21,26 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 import Newfolder from '@/components/Newfolder';
 import Changepath from '@/components/Changepath';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import File from '@/components/File';
+import Folder from '@/components/Folder';
+
+
+
 function page() {
     const {
         register,
@@ -39,6 +55,12 @@ function page() {
     const [filedata, setfiledata] = useState([])
     const [ordering, setordering] = useState([])
     const [files, setfiles] = useState([])
+    const [searchstring, setsearchstring] = useState(null)
+    const [searchQuery, setSearchQuery] = useState("");
+
+
+
+
 
     //to toggle foldercreate
     const [newfolder, setnewfolder] = useState(false)
@@ -50,13 +72,15 @@ function page() {
     //hold id and name of currunt folder
     const [currentpath, setcurrentpath] = useState({
         filefoldername: "root",
-        filefolderid: "root"
+        filefolderid: "root",
+        index: 0
     })
     // hold id's and names for breadcrumb
     const [breadpath, setbreadpath] = useState([
         {
             filefoldername: "root",
-            filefolderid: "root"
+            filefolderid: "root",
+            index: 0
         }])
 
     const [updateid, setupdateid] = useState(null)
@@ -69,20 +93,21 @@ function page() {
 
 
 
-
     // to hold code 
 
-    const [viewcode, setviewcode] = useState("nothing yet")
-    const [viewcodecopy, setviewcodecopy] = useState(null)
+    const [viewcode, setviewcode] = useState("nothing yet");
+    const [viewcodecopy, setviewcodecopy] = useState(null);
 
-    const [showcode, setshowcode] = useState(false)
-
+    const [showcode, setshowcode] = useState(false);
     const [edit, setedit] = useState(false);
-
-    const [onlyfiles, setonlyfiles] = useState(false)
-
+    const [onlyfiles, setonlyfiles] = useState(false);
 
     const timer = useRef(null)
+    const searchtimer = useRef(null)
+
+
+
+
 
     //to fetch onlyfiles
     const handleonlyfiles = async () => {
@@ -100,31 +125,46 @@ function page() {
 
     }, [onlyfiles])
 
+    // to search files according to search string
+    const handlesearch = async () => {
+        clearTimeout(searchtimer.current);
+        searchtimer.current = setTimeout(async () => {
+            if (searchstring) {
+                await axios.post("/api/search", { searchstring: searchstring }).then(res => setSearchQuery(res.data.data));
 
-    // to order data 
+            }
+        }, 500);
 
-    const dataorder = () => {
+    }
+
+    useEffect(() => {
+        handlesearch();
+    }, [searchstring]);
+
+
+
+
+    // to set ordering and which type of data to load
+    const datatodisplay = useMemo(() => {
+        const sourcedata = searchstring ? searchQuery : (onlyfiles ? files : filedata);
+
+
         if (order === "order") {
-            const sort = [...filedata].sort((a, b) => a.name.localeCompare(b.name));
-            setordering(sort);
-            console.log(sort);
+            return [...sourcedata].sort((a, b) => a.name.localeCompare(b.name));
+
 
         }
         else if (order === "date") {
-            const sort = [...filedata].sort((a, b) => new Date(b.time) - new Date(a.time))
-            setordering(sort)
-            console.log(sort);
+            return [...sourcedata].sort((a, b) => new Date(b.time) - new Date(a.time))
+
 
         }
 
         else {
-            setordering([...filedata]);
+            return sourcedata
         }
-    }
+    }, [order, filedata, searchstring, files, searchQuery, onlyfiles])
 
-    useEffect(() => {
-        dataorder()
-    }, [order, filedata])
 
 
     // to fetch and store data
@@ -137,9 +177,9 @@ function page() {
     const updatepath = async (path, name) => {
         setcurrentpath({
             filefolderid: path,
-            filefoldername: name
+            filefoldername: name,
         });
-        setbreadpath(prev => [...prev, { filefolderid: path, filefoldername: name }]);
+        setbreadpath(prev => [...prev, { filefolderid: path, filefoldername: name, index: breadpath.length }]);
 
         await axios.post('api/getfilefolder', { path: path }).then(res => setfiledata(res.data.files)).catch(error => console.log(error));
     }
@@ -155,6 +195,19 @@ function page() {
 
             setcurrentpath(newpath[newpath.length - 1]);
             await axios.post('api/getfilefolder', { path: newpath[newpath.length - 1].filefolderid }).then(res => setfiledata(res.data.files)).catch(error => console.log(error));
+        }
+
+    }
+
+
+    const handlecrumbclick = async (index) => {
+        if (breadpath.length > 1) {
+            const newpath = [...breadpath.slice(0, index + 1)];
+            setbreadpath(prev => [...prev.slice(0, index + 1)]);
+
+            setcurrentpath(newpath[breadpath.length - 1]);
+            await axios.post('api/getfilefolder', { path: newpath[newpath.length - 1].filefolderid }).then(res => setfiledata(res.data.files)).catch(error => console.log(error));
+
         }
 
     }
@@ -285,24 +338,41 @@ function page() {
 
                     <div className='flex flex-col  '>
 
-                        <div className='flex justify-between gap-2'>
+                        <div>
                             <p className='font-bold text-gray-600'>currentpath</p>
 
                         </div>
-                        <ul className='flex text-white' >
-                            {
-                                breadpath.map((path, i) => (
-                                    <Breadcrumb key={i}>
-                                        <BreadcrumbList>
-                                            <BreadcrumbItem>
-                                                {path.filefoldername}
-                                            </BreadcrumbItem>
-                                            <BreadcrumbSeparator />
-                                        </BreadcrumbList>
-                                    </Breadcrumb>
-                                ))
-                            }
-                        </ul>
+                        <div>
+
+                            <ul className=' text-white  ' >
+
+                                <Breadcrumb  className="hover:cursor-pointer">
+                                    <BreadcrumbList>
+                                           { breadpath.map((path, i) => (
+                                            <React.Fragment  key={i}>
+                                                <BreadcrumbItem onClick={() => handlecrumbclick(path.index)}>
+                                                    {path.filefoldername}
+                                                </BreadcrumbItem>
+                                                 <BreadcrumbSeparator>
+                                                 /
+                                                 </BreadcrumbSeparator>
+                                            </React.Fragment>
+                                        ))}
+                                       
+                                    </BreadcrumbList>
+                                </Breadcrumb>
+
+                            </ul>
+                        </div>
+
+
+                        <div>
+
+                        </div>
+                    </div>
+
+                    <div >
+                        <Input onChange={(e) => setsearchstring(e.target.value)} placeholder="Search" className={" hidden md:block md:w-96"} />
                     </div>
 
                     <Select onValueChange={value => setorder(value)} defaultValue={"order"}>
@@ -327,60 +397,38 @@ function page() {
                     </Select>
                 </div>
 
+                <div className=' md:hidden'>
+                    <Input placeholder="Search" className={" md:w-76"} />
+                </div>
+
                 <div className='overflow-y-auto flex flex-col gap-2 h-[68vh]'>
 
 
                     {
-                        !onlyfiles ? (
-                            ordering.length > 0 ? (
-                                ordering.map((file, i) => {
 
-                                    if (file.type === "folder") return (
-                                        <div key={i} className={`${rename.id === file._id && renametrue ? "bg-green-500" : "bg-yellow-700"} border flex flex-col text-white  hover:cursor-pointer p-3 rounded-xl hover:bg-yellow-600 `} onPointerDown={() => filefolderedit(file._id, file.name, file.discription)} onPointerUp={() => clearTimeout(timer.current)} onDoubleClick={() => updatepath(file._id, file.name)}>
-                                            <p>{file.name}</p>
-                                            <p className='text-sm text-gray-300 ' key={i}> discription - {file.discription}</p>
-                                            <p> file type - {file.type}</p>
+                        datatodisplay.length > 0 ? (
+                            datatodisplay.map((file, i) => {
 
-                                        </div>
+                                if (file.type === "folder") return (
+                                    <Folder key={i} file={file} i={i} rename={rename} renametrue={renametrue} filefolderedit={filefolderedit} timer={timer} updatepath={updatepath} />
 
+                                )
+
+                                else
+                                    if (file.type === "file") return (
+                                        <File key={i} file={file} i={i} rename={rename} renametrue={renametrue} filefolderedit={filefolderedit} timer={timer} opencode={opencode} />
                                     )
-
-                                    else
-                                        if (file.type === "file") return (
-                                            <div key={i} className={`${rename.id === file._id && renametrue ? "bg-green-500" : "bg-blue-700"} border flex flex-col text-white  hover:cursor-pointer p-3 rounded-xl hover:bg-blue-600 `} onDoubleClick={() => opencode(file.code, file._id)} onPointerDown={() => filefolderedit(file._id, file.name, file.discription)} onPointerUp={() => clearTimeout(timer.current)}>
-                                                <p>{file.name}</p>
-                                                <p className='text-sm text-gray-300 ' key={i}> discription - {file.discription}</p>
-                                                <p> file type - {file.type}</p>
-
-
-                                            </div>
-
-                                        )
-                                })) : (
-                                <div className='text-blue-400'>there are no folders yet</div>
-                            )
-
-                        ) : (
-                            <div>
-                                {
-                                    files.map((file, i) =>(
-                                        <div key={i} className={`${rename.id === file._id && renametrue ? "bg-green-500" : "bg-blue-700"} border flex flex-col text-white  hover:cursor-pointer p-3 rounded-xl hover:bg-blue-600 `} onDoubleClick={() => opencode(file.code, file._id)} onPointerDown={() => filefolderedit(file._id, file.name, file.discription)} onPointerUp={() => clearTimeout(timer.current)}>
-                                            <p>{file.name}</p>
-                                            <p className='text-sm text-gray-300 ' key={i}> discription - {file.discription}</p>
-                                            <p> file type - {file.type}</p>
-
-
-                                        </div>
-                                    ))
-                                }
-                            </div>
+                            })) : (
+                            <div className='text-blue-400'>there are no folders yet</div>
                         )
+
+
                     }
                 </div>
                 <div className=' flex justify-between gap-12'>
 
-                    <Button className=' py-1 px-2 text-black hover:bg-zinc-400  font-semibold rounded-lg w-40' onClick={handleback}>Back</Button>
-                    <Button className='bg-teal-500 font-semibold py-1 px-2 text-black  rounded-lg w-40' onClick={() => setnewfolder(prev => !prev)}>{!newfolder ? "New folder" : "close"}</Button>
+                    <Button className=' py-1 px-2 text-black hover:bg-zinc-400  font-semibold rounded-lg  w-26 md:w-40' onClick={handleback}>Back</Button>
+                    <Button className='bg-teal-500 font-semibold text-sm md:py-1 md:px-2 text-black  rounded-lg  w-26 md:w-40' onClick={() => setnewfolder(prev => !prev)}>{!newfolder ? "New folder" : "close"}</Button>
                 </div>
 
                 {
