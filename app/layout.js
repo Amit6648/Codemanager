@@ -22,17 +22,16 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark ">
 
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex font-mono`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex font-mono` } 
       >
+
         <SidebarProvider>
-
-
           <Navbar />
-          <SidebarInset >
-            <CustomTrigger />
+          <SidebarInset  >
+            <CustomTrigger  />
             {children}
           </SidebarInset>
         </SidebarProvider>

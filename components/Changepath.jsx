@@ -9,7 +9,7 @@ function Changepath({ breadpath, filedata, setchangepath, handleback, updatepath
     formState: { errors },
   } = useForm()
   return (
-    <div className='border p-5 rounded-2xl flex flex-col gap-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-zinc-800 w-[50vw] md:w-[30vw] z-30'>
+    <div className='border p-2 md:p-5 rounded-2xl flex flex-col gap-4 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-zinc-800 w-[90vw] md:w-[30vw] z-30'>
       <div className='flex flex-col '>
 
 
