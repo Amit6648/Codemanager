@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const folderschema = new mongoose.Schema({
     name: String,
+    userid : String,
     discription : String,
     code : String,
     parent : String,

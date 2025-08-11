@@ -1,10 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import Navbar from "../components/Navbar";
+import Navbar from "@/components/Navbar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { CustomTrigger } from "@/components/ui/CustomTrigger";
-
-import Providers from "./providers";
 
 
 const geistSans = Geist({
@@ -22,7 +19,7 @@ export const metadata = {
   description: "Store the code",
 };
 
-export default function RootLayout({ children }) {
+export default function AppLayout({ children }) {
   return (
     <html lang="en" className="dark ">
 
@@ -30,11 +27,14 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex font-mono` } 
       >
 
-
-            <Providers>
+        <SidebarProvider>
+          <Navbar />
+          <SidebarInset  >
+            <CustomTrigger  />
+ 
             {children}
-            </Providers>
-  
+          </SidebarInset>
+        </SidebarProvider>
       </body>
     </html>
   );

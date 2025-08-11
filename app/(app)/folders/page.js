@@ -5,6 +5,7 @@ import axios from 'axios'
 import Editor from "@monaco-editor/react";
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSession } from 'next-auth/react';
 
 import {
     Select,
@@ -24,6 +25,7 @@ import File from '@/components/File';
 import Folder from '@/components/Folder';
 import Breadcrumbmine from '@/components/Breadcrumbmine';
 import Rename from '@/components/Rename';
+
 
 
 
@@ -49,10 +51,11 @@ function Page() {
         formState: { errors },
     } = useForm()
 
+    const { data: session } = useSession();
+
 
     //hold data of folders and files
     const [filedata, setfiledata] = useState([])
-    const [ordering, setordering] = useState([])
     const [files, setfiles] = useState([])
     const [searchstring, setsearchstring] = useState(null)
     const [searchQuery, setSearchQuery] = useState([]);
@@ -175,7 +178,7 @@ function Page() {
 
     // to set ordering and which type of data to load
     const datatodisplay = useMemo(() => {
-        const sourcedata = searchstring ? searchQuery : (onlyfiles ? files : filedata);
+        const sourcedata = searchstring ? searchQuery : (onlyfiles ? files : filedata)|| [];
 
 
         if (order === "order") {
@@ -237,6 +240,7 @@ function Page() {
         await axios.post('api/filefoldercreate', {
             filefolderdata: {
                 name: data.foldername,
+                userid : session.user.id,
                 discription: data.folderdiscription,
                 parent: currentpath.filefolderid,
                 type: "folder",
@@ -401,7 +405,7 @@ function Page() {
                                 </motion.div>
                             ))
                         ) : (
-                            <div className='text-blue-400'>there are no folders yet</div>
+                            <div className='text-blue-400'>there are no folders or files yet</div>
                         )
                     }
                 </motion.div>

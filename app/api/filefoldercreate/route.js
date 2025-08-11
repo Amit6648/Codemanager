@@ -14,6 +14,7 @@ export async function POST(req) {
   try {
     await createff.create({
       name : filefolderdata.name,
+      userid : filefolderdata.userid,
       discription : filefolderdata.discription,
       parent : filefolderdata.parent,
       code : filefolderdata.code,
