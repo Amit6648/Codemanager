@@ -391,7 +391,7 @@ function Page() {
                 </div>
 
                 <div className=' md:hidden'>
-                    <Input placeholder="Search" className={" md:w-76"} />
+                    <Input onChange={(e) => setsearchstring(e.target.value)} placeholder="Search" className={"md:block md:w-96"} />
                 </div>
 
                 <motion.div
