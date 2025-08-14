@@ -67,6 +67,7 @@ function Page() {
     const [loading, setloading] = useState(true)
 
 
+
     //hold id and name of currunt folder
     const [currentpath, setcurrentpath] = useState({
         filefoldername: "root",
@@ -162,12 +163,24 @@ function Page() {
 
     // to search files according to search string
     const handlesearch = async () => {
-        clearTimeout(searchtimer.current);
-        searchtimer.current = setTimeout(async () => {
-            if (searchstring) {
-                await axios.post("/api/search", { searchstring: searchstring }).then(res => setSearchQuery(res.data.data || []));
-            }
-        }, 500);
+       
+            
+            clearTimeout(searchtimer.current);
+            searchtimer.current = setTimeout(async () => {
+                try {
+                     setloading(true)
+                    if (searchstring) {
+                        await axios.post("/api/search", { searchstring: searchstring }).then(res => setSearchQuery(res.data.data || []));
+                    }
+                } catch (error) {
+                    console.log(error);
+                    
+                }
+                finally{
+                    setloading(false)
+                }
+            }, 500);
+     
     }
 
     useEffect(() => {
