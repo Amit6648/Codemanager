@@ -309,7 +309,7 @@ function App() {
 
        <div className='z-50'>
         
-        <Newfolder newfolder={newfolder} setnewfolder={setnewfolder} foldercreate={foldercreate} />
+        <Newfolder newfolder={newfolder} setnewfolder={setnewfolder} foldercreate={foldercreate} setchangepath={setchangepath} />
         {changepath && (<Changepath breadpath={breadpath} filedata={filedata} handleback={handleback} setchangepath={setchangepath} updatepath={updatepath} />)}
        </div>
 

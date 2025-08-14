@@ -20,11 +20,11 @@ function Newfolder({newfolder, setnewfolder, setchangepath, foldercreate}) {
           {newfolder && (
 
             <motion.div
-              initial={{ opacity: 0, y: '0%' }}
-              animate={{ opacity: 1, y: '50%' }}
+              initial={{ opacity: 0, y: '-50%' }}
+              animate={{ opacity: 1, y: '0%' }}
               exit={{ opacity: 0, y: '100%' }}
               transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 20 }}
-              className='absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2'
+              className='absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2'
 
             >
 
