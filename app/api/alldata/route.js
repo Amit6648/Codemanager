@@ -4,12 +4,16 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-const session = await getServerSession(authOptions);
+
 
 
 export async function GET() {
-       mongoconnect();
+    const session = await getServerSession(authOptions);
+     if (!session) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
     try {
+        mongoconnect();
         const data =  await Folder.find({type : "file", userid : session.user.id});
         return NextResponse.json({data : data}, {status:201})
     } catch (error) {

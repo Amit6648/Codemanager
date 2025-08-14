@@ -15,7 +15,7 @@ function Newfolder({newfolder, setnewfolder, setchangepath, foldercreate}) {
       formState: { errors },
     } = useForm()
   return (
-    <AnimatePresence>
+    <AnimatePresence >
 
           {newfolder && (
 

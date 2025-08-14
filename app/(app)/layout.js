@@ -1,18 +1,7 @@
-import { Geist, Geist_Mono } from "next/font/google";
+
 import Navbar from "@/components/Navbar";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { CustomTrigger } from "@/components/ui/CustomTrigger";
-
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata = {
   title: "Code manager",
@@ -21,21 +10,15 @@ export const metadata = {
 
 export default function AppLayout({ children }) {
   return (
-    <html lang="en" className="dark ">
 
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex font-mono` } 
-      >
 
-        <SidebarProvider>
-          <Navbar />
-          <SidebarInset  >
-            <CustomTrigger  />
- 
-            {children}
-          </SidebarInset>
-        </SidebarProvider>
-      </body>
-    </html>
+    <SidebarProvider>
+      <Navbar />
+      <SidebarInset  >
+        <CustomTrigger />
+        {children}
+      </SidebarInset>
+    </SidebarProvider>
+
   );
 }

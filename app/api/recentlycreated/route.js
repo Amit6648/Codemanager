@@ -7,8 +7,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 export async function GET() {
     const session = await getServerSession(authOptions);
     try {
-        await mongoconnect();
-        console.log(session.user.id);
+        await mongoconnect();;
         
         const folders = await Folder.find({type: "file", userid : session.user.id}).sort({ time: -1 }).limit(5);
         return NextResponse.json(folders);

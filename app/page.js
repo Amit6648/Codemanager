@@ -1,59 +1,45 @@
-// app/page.js
+'use client'
+import HeroSection from "@/components/HeroSection";
+import FeatureShowcase from "@/components/FeatureShowcase";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
-'use client';
+export default function Home() {
+  return (
 
-import { useSession, signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+    <main className="flex min-h-screen w-full flex-col items-center space-y-32 py-24 px-4 bg-black/50 ">
+      <HeroSection />
 
-export default function LandingPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+      {/* This container represents the scroll-telling section */}
+      <div className="w-full max-w-5xl space-y-32 ">
+        <FeatureShowcase
+          title="A Place for Everything."
+          description="Build your personal code library with a powerful and familiar tree structure. Organize by project, language, or concept—the way you think."
+          visualPlaceholderText="[Scene 1: Camera zooms to the 'root' of the 3D tree]"
+        />
+        <FeatureShowcase
+          title="Find Snippets Instantly."
+          description="Powerful, lightning-fast search that understands context. Find exactly what you need, right when you need it, without breaking your flow."
+          visualPlaceholderText="[Scene 2: Camera pans to a 'branch' which expands]"
+          reverse
+        />
+        <FeatureShowcase
+          title="Code-Aware. Language-Smart."
+          description="With beautiful syntax highlighting for dozens of languages, your code will feel right at home. It's not just stored; it's presented."
+          visualPlaceholderText="[Scene 3: Camera focuses on a 'leaf' which flips over]"
+        />
+      </div>
 
-  // This `useEffect` hook will run when the component mounts or the session status changes.
-  // Its purpose is to redirect a user if they are already logged in.
-  useEffect(() => {
-    if (status === 'authenticated') {
-      router.push('/home');
-    }
-  }, [status, router]);
-
-  // While the session is loading, we can show a simple loading message.
-  if (status === 'loading') {
-    return <div>Loading...</div>;
-  }
-
-  // If the user is NOT logged in, we show them the landing page.
-  if (status === 'unauthenticated') {
-    return (
-      <main style={{ textAlign: 'center', fontFamily: 'sans-serif', padding: '20px' }}>
-        <div style={{ maxWidth: '600px', margin: '100px auto' }}>
-          <h1>Welcome to Your Next Big Idea 🚀</h1>
-          <p style={{ fontSize: '1.2rem', color: '#555' }}>
-            This is the landing page for your application. Describe your features,
-            benefits, and why users should sign up.
-          </p>
-          <button
-            onClick={() => signIn('google')}
-            style={{
-              marginTop: '30px',
-              padding: '15px 30px',
-              fontSize: '18px',
-              cursor: 'pointer',
-              backgroundColor: '#4285F4',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px'
-            }}
-          >
-            Sign In with Google
-          </button>
-        </div>
-      </main>
-    );
-  }
-
-  // This is a fallback for the brief moment an authenticated user might see this page
-  // before the redirect happens.
-  return <div>Loading...</div>;
+      {/* Final CTA Section */}
+      <div className="text-center space-y-4 animate-fade-in-up [animation-delay:300ms]">
+        <h2 className="text-4xl md:text-5xl font-bold text-white">Ready to Build Better?</h2>
+        <p className="text-lg text-athens-gray/80 max-w-xl mx-auto">Start organizing your digital workspace today. Free while in beta.</p>
+        <Link href="/login">
+          <Button className={"text-lg font-semibold hover:bg-black border hover:border-white hover:text-white"}>
+            Join the Beta
+          </Button>
+        </Link>
+      </div>
+    </main>
+  );
 }

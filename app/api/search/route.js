@@ -4,12 +4,13 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-const session = await getServerSession(authOptions);
+
 
 
 
 export async function POST(req) {
     await mongoconnect();
+    const session = await getServerSession(authOptions);
 
     try {
         const search = await req.json();

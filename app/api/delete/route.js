@@ -2,11 +2,17 @@
 import { NextResponse } from "next/server";
 import Folder from "@/models/createfilefolder";
 import mongoconnect from "@/lib/mongo";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-mongoconnect();
 export async function POST(request) {
-
+    const session = await getServerSession(authOptions);
+    if (!session) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
     try {
+        mongoconnect();
         const reqBody = await request.json();
         const { id } = reqBody;
 
@@ -15,18 +21,14 @@ export async function POST(request) {
         }
 
 
-        const deletedItem = await Folder.findByIdAndDelete(id);
-        const childdelteditems = await Folder.deleteMany({ parent: id });
-
-
-
-
-
-        if (!deletedItem) {
+        const deletedItem = await Folder.deleteOne({ _id: id, userid: session.user.id });
+        
+        if (deletedItem.deletedCount===0) {
             console.log("somthing wrong");
-
+            
             return NextResponse.json({ error: "Item not found" }, { status: 404 });
         }
+        const childdelteditems = await Folder.deleteMany({ parent: id, userid: session.user.id });
 
         return NextResponse.json({
             message: "Item deleted successfully",

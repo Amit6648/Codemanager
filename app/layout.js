@@ -1,10 +1,12 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
-import Navbar from "../components/Navbar";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { CustomTrigger } from "@/components/ui/CustomTrigger";
-
 import Providers from "./providers";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+})
 
 
 const geistSans = Geist({
@@ -27,7 +29,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className="dark ">
 
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex font-mono` } 
+        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased flex font-mono` } 
       >
 
 

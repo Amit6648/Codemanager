@@ -1,7 +1,13 @@
 // app/api/auth/[...nextauth]/route.js
+import mongoconnect from "@/lib/mongo";
+import User from "@/models/user";
+import bcrypt from "bcrypt";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
+
 
 // Read the environment variables
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
@@ -19,21 +25,59 @@ export const authOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
+    GitHubProvider({
+      clientId: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    }),
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {},
+      async authorize(credentials) {
+        const { email, password } = credentials;
+        try {
+          await mongoconnect();
+          const user = await User.findOne({ email });
+
+          if (!user) { return null; }
+
+          const passwordsMatch = await bcrypt.compare(password, user.password);
+          if (!passwordsMatch) { return null; }
+          
+          // The 'user' object from your database (with the _id) is returned here
+          return user; 
+        } catch (error) {
+          console.log("Error: ", error);
+          return null;
+        }
+      },
+    }),
   ],
   // 👇 THIS SECTION IS LIKELY MISSING OR INCORRECT IN YOUR CODE
   callbacks: {
-    async jwt({ token, profile }) {
-      // On initial sign-in, add the user's Google ID to the token
-      if (profile) {
-        token.id = profile.sub; // 'sub' is Google's unique user ID
+    // ✅ 2. Updated JWT callback to handle both login types
+    async jwt({ token, user }) {
+      // The 'user' object is available on the first sign-in
+      if (user) {
+        // user._id is from your MongoDB (Credentials)
+        // user.id is from the OAuth provider (Google)
+        token.id = user._id?.toString() || user.id;
       }
       return token;
     },
     async session({ session, token }) {
-      // Add the ID from the token to the session.user object
-      session.user.id = token.id;
+      // Add the ID from the token to the session object
+      if (token) {
+        session.user.id = token.id;
+      }
       return session;
     },
+  },
+  session: {
+    strategy: "jwt",
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+  pages: {
+    signIn: "/login",
   },
 };
 

@@ -5,7 +5,6 @@ import axios from 'axios'
 import Editor from "@monaco-editor/react";
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSession } from 'next-auth/react';
 
 import {
     Select,
@@ -39,6 +38,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 
@@ -50,9 +50,6 @@ function Page() {
         watch,
         formState: { errors },
     } = useForm()
-
-    const { data: session } = useSession();
-
 
     //hold data of folders and files
     const [filedata, setfiledata] = useState([])
@@ -67,6 +64,7 @@ function Page() {
     const [changepath, setchangepath] = useState(false)
     const [order, setorder] = useState("order")
     const [isdialogopen, setisdialogopen] = useState(false)
+    const [loading, setloading] = useState(true)
 
 
     //hold id and name of currunt folder
@@ -167,7 +165,7 @@ function Page() {
         clearTimeout(searchtimer.current);
         searchtimer.current = setTimeout(async () => {
             if (searchstring) {
-                await axios.post("/api/search", { searchstring: searchstring }).then(res => setSearchQuery(res.data.data));
+                await axios.post("/api/search", { searchstring: searchstring }).then(res => setSearchQuery(res.data.data || []));
             }
         }, 500);
     }
@@ -178,7 +176,7 @@ function Page() {
 
     // to set ordering and which type of data to load
     const datatodisplay = useMemo(() => {
-        const sourcedata = searchstring ? searchQuery : (onlyfiles ? files : filedata)|| [];
+        const sourcedata = searchstring ? searchQuery : (onlyfiles ? files : filedata) || [];
 
 
         if (order === "order") {
@@ -196,7 +194,17 @@ function Page() {
 
     // to fetch and store data
     const filefolderholder = async () => {
-        await axios.post('api/getfilefolder', { path: currentpath.filefolderid }).then(res => setfiledata(res.data.files)).catch(error => console.log(error));
+        setloading(true);
+        try {
+            await axios.post('api/getfilefolder', { path: currentpath.filefolderid }).then(res => setfiledata(res.data.files)).catch(error => console.log(error));
+
+        } catch (error) {
+            console.log(error);
+
+        }
+        finally {
+            setloading(false);
+        }
     }
 
     // to update path when we open folders
@@ -240,7 +248,6 @@ function Page() {
         await axios.post('api/filefoldercreate', {
             filefolderdata: {
                 name: data.foldername,
-                userid : session.user.id,
                 discription: data.folderdiscription,
                 parent: currentpath.filefolderid,
                 type: "folder",
@@ -343,7 +350,7 @@ function Page() {
     return (
         <div className=' max-w-screen relative h-auto backdrop-blur-xl ' >
 
-            <motion.div 
+            <motion.div
                 className='border p-5 rounded flex flex-col gap-4 max-w-[85vw] md:max-w-[75vw] mx-auto'
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -387,13 +394,13 @@ function Page() {
                     <Input placeholder="Search" className={" md:w-76"} />
                 </div>
 
-                <motion.div 
+                <motion.div
                     className='overflow-y-auto flex flex-col gap-2 h-[68vh]'
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
                 >
-                    {
+                    {!loading ? (
                         datatodisplay.length > 0 ? (
                             datatodisplay.map((file, i) => (
                                 <motion.div key={i} variants={itemVariants}>
@@ -407,7 +414,14 @@ function Page() {
                         ) : (
                             <div className='text-blue-400'>there are no folders or files yet</div>
                         )
-                    }
+                    ) : (
+                        <div className='flex flex-col gap-3'>
+                            <Skeleton className={"bg-zinc-600 w-full h-16 rounded-2xl"} />
+                            <Skeleton className={"bg-zinc-600 w-full h-16 rounded-2xl"} />
+
+
+                        </div>
+                    )}
                 </motion.div>
                 <div className=' flex justify-between gap-12'>
                     <Button className=' py-1 px-2 text-black hover:bg-zinc-400 font-semibold rounded-lg w-26 md:w-40' onClick={handleback}>Back</Button>
@@ -416,10 +430,10 @@ function Page() {
 
                 <AnimatePresence>
                     {newfolder && (
-                         <motion.div 
+                        <motion.div
                             initial="hidden" animate="visible" exit="exit" variants={modalVariants}
                             className='fixed inset-0 bg-black/60 z-50 flex items-center justify-center'
-                         >
+                        >
                             <Newfolder foldercreate={foldercreate} newfolder={newfolder} setnewfolder={setnewfolder} setchangepath={setchangepath} />
                         </motion.div>
                     )}
@@ -428,7 +442,7 @@ function Page() {
 
             <AnimatePresence>
                 {changepath && (
-                    <motion.div 
+                    <motion.div
                         initial="hidden" animate="visible" exit="exit" variants={modalVariants}
                         className='fixed inset-0 bg-black/60 z-50 flex items-center justify-center'
                     >
@@ -437,7 +451,7 @@ function Page() {
                 )}
 
                 {showcode && (
-                    <motion.div 
+                    <motion.div
                         initial="hidden" animate="visible" exit="exit" variants={modalVariants}
                         className='fixed inset-0 bg-black/80 z-50 flex items-center justify-center'
                     >
@@ -464,7 +478,7 @@ function Page() {
                 )}
 
                 {renametrue && (
-                    <motion.div 
+                    <motion.div
                         initial="hidden" animate="visible" exit="exit" variants={modalVariants}
                         className='fixed inset-0 bg-black/60 z-50 flex items-center justify-center'
                     >
